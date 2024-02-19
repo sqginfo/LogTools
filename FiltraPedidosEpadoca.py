@@ -20,10 +20,12 @@ def extrair_json_do_log(log):
     matches = re.findall(r'Posição :BuscarPedidosNovosCompletos: (.*?)(?=\n-{50,})', log, re.DOTALL)
     return matches
 
-def salvar_jsons_na_pasta(logs_folder, jsons, nome_arquivo):
-    # Criar a pasta com o nome do arquivo
-    pasta_arquivo = os.path.join(logs_folder, nome_arquivo)
-    os.makedirs(pasta_arquivo, exist_ok=True)
+def salvar_jsons_na_pasta(logs_folder, jsons):
+    # Excluir arquivos existentes no logs_folder
+    for arquivo_existente in os.listdir(logs_folder):
+        caminho_arquivo = os.path.join(logs_folder, arquivo_existente)
+        if os.path.isfile(caminho_arquivo):
+            os.remove(caminho_arquivo)
 
     # Lista para armazenar números de pedidos já salvos
     numeros_salvos = []
@@ -47,7 +49,7 @@ def salvar_jsons_na_pasta(logs_folder, jsons, nome_arquivo):
                 numeros_salvos.append(numero_pedido)
 
                 # Criar nome do arquivo
-                filename = os.path.join(pasta_arquivo, f"{numero_pedido}_{idx}_{i}.json")
+                filename = os.path.join(logs_folder, f"{numero_pedido}_{idx}_{i}.json")
 
                 # Salvar o JSON do pedido no arquivo
                 with open(filename, 'w') as file:
@@ -94,4 +96,4 @@ if __name__ == "__main__":
     jsons = extrair_json_do_log(log_content)
 
     # Salvar os JSONs na pasta desejada
-    salvar_jsons_na_pasta(caminho_salvar_log, jsons, nome_arquivo_log)
+    salvar_jsons_na_pasta(caminho_salvar_log, jsons)
