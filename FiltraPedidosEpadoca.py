@@ -52,8 +52,8 @@ def salvar_jsons_na_pasta(logs_folder, jsons):
                 filename = os.path.join(logs_folder, f"{numero_pedido}_{idx}_{i}.json")
 
                 # Salvar o JSON do pedido no arquivo
-                with open(filename, 'w') as file:
-                    json.dump(pedido, file, indent=2)
+                with open(filename, 'w', encoding='utf-8') as file:
+                    json.dump(pedido, file, indent=2, ensure_ascii=False)
                     print(f"JSON do pedido {numero_pedido} salvo em: {filename}")
             else:
                 print(f"Número do pedido {numero_pedido} já salvo. Ignorando duplicata.")
