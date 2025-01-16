@@ -15,52 +15,65 @@ def criar_pasta_se_nao_existe(caminho_pasta):
         os.makedirs(caminho_pasta)
         print(f"Pasta {caminho_pasta} criada.")
 
+def substituir_posicao(log):
+    # Substitui 'Posição :{"id' por 'Posição :BuscaDetalhesPedidoRetorno {"id' em todo o log
+    log_modificado = re.sub(r'Posição :\{"id', 'Posição :BuscaDetalhesPedidoRetorno {"id', log)
+    return log_modificado
+
 def extrair_json_do_log(log):
     # Procurar por padrões JSON nos logs
-    matches = re.findall(r'Posição :Retorno Busca Pedido Completo: (.*?)(?=\n-{50,})', log, re.DOTALL)
+    matches = re.findall(r'Posição :BuscaDetalhesPedidoRetorno (.*?)(?=\n-{50,})', log, re.DOTALL)
+    json_data = []
+    for match in matches:
+        # Tenta carregar o conteúdo como JSON
+        try:
+            parsed_json = json.loads(match.strip())
+            json_data.append(parsed_json)
+        except json.JSONDecodeError:
+            # Ignora caso o conteúdo não seja JSON válido
+            continue
     return matches
 
-def salvar_jsons_na_pasta(logs_folder, jsons):
+def exclui_arquivos_existente(logs_folder):
     # Excluir arquivos existentes no logs_folder
     for arquivo_existente in os.listdir(logs_folder):
         caminho_arquivo = os.path.join(logs_folder, arquivo_existente)
         if os.path.isfile(caminho_arquivo):
             os.remove(caminho_arquivo)
 
+def salvar_jsons_na_pasta(logs_folder, jsons):
+    # Excluir arquivos existentes no logs_folder
+    exclui_arquivos_existente(logs_folder)
+
     # Lista para armazenar números de pedidos já salvos
     numeros_salvos = []
 
     # Salvar cada JSON individualmente
-    for idx, json_data in enumerate(jsons, 1):
+    for idx, pedido_json in enumerate(jsons, 1):
         # Carregar o JSON
         try:
-            json_obj = json.loads(json_data)
+            pedido_obj = json.loads(pedido_json)
         except json.JSONDecodeError as e:
             print(f"Erro ao decodificar JSON: {e}")
             continue
 
-        # Iterar sobre cada pedido no JSON
-        for i, pedido in enumerate(json_obj):
-            # Use o número do pedido como nome do arquivo
-            numero_pedido = pedido['numero'].replace("#", "")
-
-            # Verificar se o número do pedido já foi salvo
-            if numero_pedido not in numeros_salvos:
-                numeros_salvos.append(numero_pedido)
-
-                # Criar nome do arquivo
-                filename = os.path.join(logs_folder, f"{numero_pedido}_{idx}_{i}.json")
-
-                # Salvar o JSON do pedido no arquivo
-                with open(filename, 'w', encoding='utf-8') as file:
-                    json.dump(pedido, file, indent=2, ensure_ascii=False)
-                    print(f"JSON do pedido {numero_pedido} salvo em: {filename}")
-            else:
-                print(f"Número do pedido {numero_pedido} já salvo. Ignorando duplicata.")
+        # Use o número do pedido como nome do arquivo
+        numero_pedido = pedido_obj['displayId'].replace("#", "")
+        # Verificar se o número do pedido já foi salvo
+        if pedido_obj['displayId'] not in numeros_salvos:
+            numeros_salvos.append(numero_pedido)
+            # Criar nome do arquivo
+            filename = os.path.join(logs_folder, f"{numero_pedido}_{idx}.json")
+            # Salvar o JSON do pedido no arquivo
+            with open(filename, 'w', encoding='utf-8') as file:
+                json.dump(pedido_obj, file, indent=2, ensure_ascii=False)
+                print(f"JSON do pedido {numero_pedido} salvo em: {filename}")
+        else:
+            print(f"Número do pedido {numero_pedido} já salvo. Ignorando duplicata.")
 
 if __name__ == "__main__":
     # Subpastas
-    pastas = [r'C:\integradorDeliveryDev\logsOriginais', r'C:\integradorDeliveryDev\logsFinais']
+    pastas = [r'C:\integradorDeliveryDev\ePadoca\logsOriginais', r'C:\integradorDeliveryDev\ePadoca\logsFinais']
 
     # Verifique se as pastas foram criadas e exiba a mensagem correspondente
     if all(os.path.exists(endereco_pasta) for endereco_pasta in pastas):
@@ -91,6 +104,9 @@ if __name__ == "__main__":
 
     with open(caminho_log_original_completo, 'r', encoding='utf-8') as file:
         log_content = file.read()
+
+    # Substituir a posição
+    log_content = substituir_posicao(log_content)
 
     # Extrair os JSONs dos logs
     jsons = extrair_json_do_log(log_content)
