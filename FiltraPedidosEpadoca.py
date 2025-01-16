@@ -60,15 +60,15 @@ def salvar_jsons_na_pasta(logs_folder, jsons):
 
 if __name__ == "__main__":
     # Subpastas
-    pastas = [r'C:\integradorDeliveryDev\ePadoca\logsOriginais', r'C:\integradorDeliveryDev\ePadoca\logsFinais']
+    pastas = [r'C:\integradorDeliveryDev\logsOriginais', r'C:\integradorDeliveryDev\logsFinais']
 
     # Verifique se as pastas foram criadas e exiba a mensagem correspondente
     if all(os.path.exists(endereco_pasta) for endereco_pasta in pastas):
-        print("Certifique-se que os rastros de logs estao localizados em 'C:/integradorDeliveryDev/ePadoca/logsOriginais' antes de executar o script.")
+        print("Certifique-se que os rastros de logs estao localizados em 'C:/integradorDeliveryDev/logsOriginais' antes de executar o script.")
     else: # cria as pastas
         for endereco_pasta in pastas:
             criar_pasta_se_nao_existe(endereco_pasta)
-        print("Coloque os rastros de log dentro da pasta 'C:/integradorDeliveryDev/ePadoca/logsOriginais' e reinicie o script.")
+        print("Coloque os rastros de log dentro da pasta 'C:/integradorDeliveryDev/logsOriginais' e reinicie o script.")
         sys.exit()
 
     # Solicitar o nome do arquivo de log
@@ -79,8 +79,8 @@ if __name__ == "__main__":
         sys.exit()
 
     # Usar os caminhos fornecidos
-    caminho_log_original = r'C:\integradorDeliveryDev\ePadoca\logsOriginais'
-    caminho_salvar_log = r'C:\integradorDeliveryDev\ePadoca\logsFinais'
+    caminho_log_original = r'C:\integradorDeliveryDev\logsOriginais'
+    caminho_salvar_log = r'C:\integradorDeliveryDev\logsFinais'
 
     # Ler o arquivo de log original
     caminho_log_original_completo = os.path.join(caminho_log_original, nome_arquivo_log)
